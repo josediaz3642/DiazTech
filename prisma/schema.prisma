@@ -1,0 +1,593 @@
+// DiazTech — Prisma Schema
+// Sistema de Gestión Empresarial para Argentina
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ══════════════════════════════════════════════
+// AUTH & TENANCY
+// ══════════════════════════════════════════════
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String    // bcrypt hashed
+  name          String
+  phone         String?
+  avatar        String?
+  emailVerified DateTime?
+  isGlobalAdmin Boolean   @default(false) // SUPER_ADMIN
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  memberships        Membership[]
+  sessions           Session[]
+  verificationTokens VerificationToken[]
+  auditLogs          AuditLog[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid())
+  userId  String
+  token   String   @unique
+  type    String   @default("email") // email, password_reset
+  expires DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id          String  @id @default(cuid())
+  name        String
+  fantasyName String?
+  cuit        String?
+  address     String?
+  phone       String?
+  email       String?
+  logo        String? // URL
+
+  // Tax info
+  taxCategory String? // Responsable Inscripto, Monotributista, etc.
+  iibbNumber  String? // Ingresos Brutos
+  startDate   DateTime?
+
+  // AFIP config
+  afipEnvironment String @default("testing") // testing | production
+  afipCertPath    String?
+  afipKeyPath     String?
+  defaultPointOfSale Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  memberships   Membership[]
+  clients       Client[]
+  suppliers     Supplier[]
+  products      Product[]
+  categories    Category[]
+  warehouses    Warehouse[]
+  invoices      Invoice[]
+  receipts      Receipt[]
+  budgets       Budget[]
+  remitos       Remito[]
+  cashRegisters CashRegister[]
+  bankAccounts  BankAccount[]
+  checks        Check[]
+  crmTasks      CrmTask[]
+  auditLogs     AuditLog[]
+  subscription  Subscription?
+}
+
+model Membership {
+  id          String   @id @default(cuid())
+  userId      String
+  companyId   String
+  role        Role     @default(EMPLOYEE)
+  permissions String[] // Array of specific permissions
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  EMPLOYEE
+  VIEWER
+}
+
+// ══════════════════════════════════════════════
+// SUBSCRIPTIONS & PAYMENTS (Mercado Pago)
+// ══════════════════════════════════════════════
+
+model Subscription {
+  id               String    @id @default(cuid())
+  companyId        String    @unique
+  plan             String    @default("trial") // trial, starter, pro, enterprise
+  status           String    @default("active") // active, cancelled, expired, past_due
+  mpSubscriptionId String? // Mercado Pago subscription ID
+  mpPayerId        String? // Mercado Pago payer ID
+
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  trialEnd           DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payments Payment[]
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  subscriptionId String
+  mpPaymentId    String? // Mercado Pago payment ID
+  amount         Decimal
+  currency       String   @default("ARS")
+  status         String // approved, pending, rejected, refunded
+  paymentMethod  String? // credit_card, debit_card, account_money
+  paidAt         DateTime?
+  createdAt      DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+}
+
+// ══════════════════════════════════════════════
+// CLIENTS & SUPPLIERS
+// ══════════════════════════════════════════════
+
+model Client {
+  id          String  @id @default(cuid())
+  companyId   String
+  name        String
+  cuit        String?
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  province    String?
+  taxCategory String? // Responsable Inscripto, Monotributista, Consumidor Final, etc.
+  balance     Decimal @default(0) // Cuenta corriente ARS
+  balanceUsd  Decimal @default(0) // Cuenta corriente USD
+  notes       String?
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company    Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoices   Invoice[]
+  receipts   Receipt[]
+  budgets    Budget[]
+  remitos    Remito[]
+  movements  AccountMovement[]
+}
+
+model Supplier {
+  id          String  @id @default(cuid())
+  companyId   String
+  name        String
+  cuit        String?
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  province    String?
+  taxCategory String?
+  balance     Decimal @default(0)
+  balanceUsd  Decimal @default(0)
+  notes       String?
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company   Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  receipts  Receipt[]
+  movements AccountMovement[]
+}
+
+model AccountMovement {
+  id          String   @id @default(cuid())
+  companyId   String
+  clientId    String?
+  supplierId  String?
+  type        String // invoice, receipt, payment, adjustment
+  description String
+  amount      Decimal
+  currency    String   @default("ARS")
+  balance     Decimal // Running balance after this movement
+  referenceId String? // Invoice/Receipt ID
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  client   Client?   @relation(fields: [clientId], references: [id])
+  supplier Supplier? @relation(fields: [supplierId], references: [id])
+}
+
+// ══════════════════════════════════════════════
+// PRODUCTS & STOCK (Multi-Warehouse)
+// ══════════════════════════════════════════════
+
+model Category {
+  id        String @id @default(cuid())
+  companyId String
+  name      String
+  color     String?
+  createdAt DateTime @default(now())
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([companyId, name])
+}
+
+model Warehouse {
+  id        String  @id @default(cuid())
+  companyId String
+  name      String
+  address   String?
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  stockLevels    StockLevel[]
+  stockMovements StockMovement[]
+
+  @@unique([companyId, name])
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  companyId   String
+  code        String
+  name        String
+  description String?
+  categoryId  String?
+  unit        String  @default("unidad") // unidad, kg, litro, metro, etc.
+  costPrice   Decimal @default(0)
+  salePrice   Decimal @default(0)
+  costPriceUsd Decimal @default(0)
+  salePriceUsd Decimal @default(0)
+  ivaRate     Decimal @default(21) // 21%, 10.5%, 27%, 0%
+  minStock    Decimal @default(0)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  category      Category?      @relation(fields: [categoryId], references: [id])
+  stockLevels   StockLevel[]
+  stockMovements StockMovement[]
+  invoiceItems  InvoiceItem[]
+  budgetItems   BudgetItem[]
+  remitoItems   RemitoItem[]
+
+  @@unique([companyId, code])
+}
+
+model StockLevel {
+  id          String  @id @default(cuid())
+  productId   String
+  warehouseId String
+  quantity    Decimal @default(0)
+  updatedAt   DateTime @updatedAt
+
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, warehouseId])
+}
+
+model StockMovement {
+  id          String   @id @default(cuid())
+  companyId   String
+  productId   String
+  warehouseId String
+  type        String // in, out, adjustment, transfer
+  quantity    Decimal
+  description String?
+  referenceId String? // Invoice/Remito ID
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  product   Product   @relation(fields: [productId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+}
+
+// ══════════════════════════════════════════════
+// INVOICING (AFIP)
+// ══════════════════════════════════════════════
+
+model Invoice {
+  id            String   @id @default(cuid())
+  companyId     String
+  clientId      String?
+  type          String // A, B, C, NCA, NCB, NCC, NDA, NDB, NDC
+  pointOfSale   Int
+  number        Int
+  date          DateTime
+  dueDate       DateTime?
+  subtotal      Decimal
+  ivaTotal      Decimal
+  otherTaxes    Decimal  @default(0)
+  total         Decimal
+  currency      String   @default("ARS")
+  exchangeRate  Decimal  @default(1)
+  cae           String? // Código de Autorización Electrónico
+  caeExpiration DateTime?
+  status        String   @default("pending") // pending, authorized, cancelled
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  client  Client?  @relation(fields: [clientId], references: [id])
+  items   InvoiceItem[]
+
+  @@unique([companyId, type, pointOfSale, number])
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  productId   String?
+  description String
+  quantity    Decimal
+  unitPrice   Decimal
+  ivaRate     Decimal @default(21)
+  ivaAmount   Decimal
+  subtotal    Decimal
+  total       Decimal
+
+  invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+}
+
+// ══════════════════════════════════════════════
+// CASH REGISTER
+// ══════════════════════════════════════════════
+
+model CashRegister {
+  id          String    @id @default(cuid())
+  companyId   String
+  date        DateTime
+  openAmount  Decimal
+  closeAmount Decimal?
+  status      String    @default("open") // open, closed
+  notes       String?
+  openedBy    String?
+  closedBy    String?
+  createdAt   DateTime  @default(now())
+
+  company   Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  movements CashMovement[]
+}
+
+model CashMovement {
+  id             String   @id @default(cuid())
+  cashRegisterId String
+  type           String // income, expense
+  category       String // sale, collection, purchase, payment, withdrawal, deposit, other
+  description    String
+  amount         Decimal
+  currency       String   @default("ARS")
+  referenceId    String? // Invoice/Receipt ID
+  date           DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  cashRegister CashRegister @relation(fields: [cashRegisterId], references: [id], onDelete: Cascade)
+}
+
+// ══════════════════════════════════════════════
+// BANKS
+// ══════════════════════════════════════════════
+
+model BankAccount {
+  id            String  @id @default(cuid())
+  companyId     String
+  bankName      String
+  accountType   String // CA (Caja Ahorro), CC (Cuenta Corriente)
+  accountNumber String?
+  cbu           String?
+  alias         String?
+  currency      String  @default("ARS")
+  balance       Decimal @default(0)
+  isActive      Boolean @default(true)
+  createdAt     DateTime @default(now())
+
+  company   Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  movements BankMovement[]
+}
+
+model BankMovement {
+  id            String   @id @default(cuid())
+  bankAccountId String
+  type          String // credit, debit
+  description   String
+  amount        Decimal
+  balance       Decimal // Running balance
+  referenceId   String? // Invoice/Check/Receipt ID
+  date          DateTime
+  createdAt     DateTime @default(now())
+
+  bankAccount BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+}
+
+// ══════════════════════════════════════════════
+// CHECKS
+// ══════════════════════════════════════════════
+
+model Check {
+  id        String   @id @default(cuid())
+  companyId String
+  type      String // received, issued
+  bankName  String
+  number    String
+  amount    Decimal
+  currency  String   @default("ARS")
+  issueDate DateTime
+  dueDate   DateTime
+  status    String   @default("pending") // pending, deposited, cashed, bounced, cancelled, endorsed
+  payer     String?
+  payee     String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+// ══════════════════════════════════════════════
+// BUDGETS & REMITOS & RECEIPTS
+// ══════════════════════════════════════════════
+
+model Budget {
+  id         String    @id @default(cuid())
+  companyId  String
+  clientId   String?
+  number     Int
+  date       DateTime
+  validUntil DateTime?
+  subtotal   Decimal
+  ivaTotal   Decimal
+  total      Decimal
+  currency   String    @default("ARS")
+  status     String    @default("draft") // draft, sent, approved, rejected, invoiced
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  company Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  client  Client?      @relation(fields: [clientId], references: [id])
+  items   BudgetItem[]
+
+  @@unique([companyId, number])
+}
+
+model BudgetItem {
+  id          String  @id @default(cuid())
+  budgetId    String
+  productId   String?
+  description String
+  quantity    Decimal
+  unitPrice   Decimal
+  ivaRate     Decimal @default(21)
+  ivaAmount   Decimal
+  subtotal    Decimal
+  total       Decimal
+
+  budget  Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+}
+
+model Remito {
+  id        String   @id @default(cuid())
+  companyId String
+  clientId  String?
+  number    Int
+  date      DateTime
+  status    String   @default("pending") // pending, delivered, cancelled
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  client  Client?      @relation(fields: [clientId], references: [id])
+  items   RemitoItem[]
+
+  @@unique([companyId, number])
+}
+
+model RemitoItem {
+  id          String  @id @default(cuid())
+  remitoId    String
+  productId   String?
+  description String
+  quantity    Decimal
+  unit        String  @default("unidad")
+
+  remito  Remito   @relation(fields: [remitoId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+}
+
+model Receipt {
+  id          String   @id @default(cuid())
+  companyId   String
+  clientId    String?
+  supplierId  String?
+  number      Int
+  type        String // collection (cobro), payment (pago)
+  date        DateTime
+  total       Decimal
+  currency    String   @default("ARS")
+  paymentMethod String // cash, transfer, check, mercadopago, other
+  description String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  client   Client?   @relation(fields: [clientId], references: [id])
+  supplier Supplier? @relation(fields: [supplierId], references: [id])
+
+  @@unique([companyId, type, number])
+}
+
+// ══════════════════════════════════════════════
+// CRM
+// ══════════════════════════════════════════════
+
+model CrmTask {
+  id          String    @id @default(cuid())
+  companyId   String
+  title       String
+  description String?
+  priority    String    @default("medium") // low, medium, high, urgent
+  status      String    @default("pending") // pending, in_progress, completed, cancelled
+  dueDate     DateTime?
+  assignedTo  String?
+  clientId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+// ══════════════════════════════════════════════
+// AUDIT LOG
+// ══════════════════════════════════════════════
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  companyId String?
+  userId    String
+  action    String // CREATE, UPDATE, DELETE
+  entity    String // Client, Invoice, Product, etc.
+  entityId  String
+  changes   Json? // Details of changes
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  company Company? @relation(fields: [companyId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+}

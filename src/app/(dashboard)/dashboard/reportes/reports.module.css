@@ -1,0 +1,568 @@
+/* ══════════════════════════════════════════════════
+   REPORTS MODULE — CSS
+   GestiónPro · Fase 7
+   ══════════════════════════════════════════════════ */
+
+/* ── Page Header ─────────────────────────────────── */
+
+.reportHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.reportHeaderLeft {
+  flex: 1;
+  min-width: 0;
+}
+
+.reportTitle {
+  font-size: var(--font-2xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.reportSubtitle {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ── Hub Cards (Reports Index) ───────────────────── */
+
+.hubGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+
+.hubCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.hubCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  border-radius: var(--radius-xl);
+}
+
+.hubCard:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-primary);
+  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+}
+
+.hubCard:hover::before {
+  opacity: 1;
+}
+
+.hubCardIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.iconSales { background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15)); }
+.iconTreasury { background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15)); }
+.iconStock { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.15)); }
+.iconCrm { background: linear-gradient(135deg, rgba(236,72,153,0.2), rgba(219,39,119,0.15)); }
+
+.hubCardTitle {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.hubCardDesc {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.hubCardArrow {
+  margin-top: auto;
+  font-size: var(--font-lg);
+  color: var(--accent-primary);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: all 0.2s ease;
+}
+
+.hubCard:hover .hubCardArrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Period Filter ───────────────────────────────── */
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.filterBtns {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.filterBtn:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.filterBtn.active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #fff;
+}
+
+.exportBtn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.exportBtn:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+/* ── KPI Cards ───────────────────────────────────── */
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.kpiCard {
+  padding: var(--space-5);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: relative;
+  overflow: hidden;
+}
+
+.kpiCard::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.kpiPrimary::after { background: linear-gradient(90deg, var(--accent-primary), #8b5cf6); }
+.kpiSuccess::after { background: linear-gradient(90deg, var(--success), #34d399); }
+.kpiWarning::after { background: linear-gradient(90deg, var(--warning), #fcd34d); }
+.kpiDanger::after { background: linear-gradient(90deg, var(--danger), #fb7185); }
+
+.kpiLabel {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpiValue {
+  font-size: var(--font-2xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.kpiChange {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.kpiChange.up {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.kpiChange.down {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.kpiChange.neutral {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent-primary);
+}
+
+/* ── Charts Section ──────────────────────────────── */
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.chartsGridFull {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.chartCard {
+  padding: var(--space-5);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.chartCardFull {
+  grid-column: 1 / -1;
+}
+
+.chartTitle {
+  font-size: var(--font-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.chartSubtitle {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.chartWrapper {
+  width: 100%;
+  height: 280px;
+}
+
+.chartWrapperTall {
+  width: 100%;
+  height: 360px;
+}
+
+/* ── Tables ──────────────────────────────────────── */
+
+.tableCard {
+  padding: var(--space-5);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-5);
+}
+
+.tableCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.tableCardTitle {
+  font-size: var(--font-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.reportTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.reportTable th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.reportTable th.right,
+.reportTable td.right {
+  text-align: right;
+}
+
+.reportTable td {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.reportTable tr:last-child td {
+  border-bottom: none;
+}
+
+.reportTable tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-primary);
+}
+
+.rankBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: var(--font-xs);
+  font-weight: 700;
+}
+
+.rank1 { background: rgba(251, 191, 36, 0.2); color: #f59e0b; }
+.rank2 { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
+.rank3 { background: rgba(180, 83, 9, 0.2); color: #b45309; }
+.rankRest { background: rgba(99, 102, 241, 0.1); color: var(--accent-primary); }
+
+/* ── Status & Priority Badges ────────────────────── */
+
+.statusBadge,
+.priorityBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+
+.statusPending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.statusInProgress { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+.statusCompleted { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.statusCancelled { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
+
+.priorityLow { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.priorityMedium { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.priorityHigh { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.priorityUrgent { background: rgba(220, 38, 38, 0.2); color: #dc2626; }
+
+.overdueBadge {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 999px;
+  margin-left: var(--space-2);
+}
+
+/* ── Empty State ─────────────────────────────────── */
+
+.emptyState {
+  text-align: center;
+  padding: var(--space-10);
+  color: var(--text-muted);
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: var(--space-3);
+  opacity: 0.5;
+}
+
+.emptyTitle {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.emptyDesc {
+  font-size: var(--font-sm);
+}
+
+/* ── Stock Progress Bar ──────────────────────────── */
+
+.stockBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stockBarTrack {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.stockBarFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.stockBarFill.good { background: linear-gradient(90deg, var(--success), #34d399); }
+.stockBarFill.low { background: linear-gradient(90deg, var(--warning), #fcd34d); }
+.stockBarFill.critical { background: linear-gradient(90deg, var(--danger), #fb7185); }
+
+.stockBarLabel {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* ── Back Link ───────────────────────────────────── */
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  margin-bottom: var(--space-5);
+  transition: color 0.15s ease;
+}
+
+.backLink:hover {
+  color: var(--text-primary);
+}
+
+/* ── Tooltip override ────────────────────────────── */
+.recharts-default-tooltip {
+  background: var(--surface-hover) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ── Print styles ────────────────────────────────── */
+@media print {
+  .filterBar,
+  .backLink,
+  .exportBtn {
+    display: none !important;
+  }
+
+  .chartCard,
+  .tableCard,
+  .kpiCard {
+    break-inside: avoid;
+    border: 1px solid #ccc;
+    box-shadow: none;
+  }
+
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 1024px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .reportHeader {
+    flex-direction: column;
+  }
+
+  .hubGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
