@@ -2,7 +2,7 @@ import { getRemitos } from "@/actions/remitos";
 import { getClientsForSelect, getProductsForSelect } from "@/actions/invoices";
 import RemitosClient from "./RemitosClient";
 
-export const revalidate = 0; // Disable server component caching to ensure real-time data
+export const dynamic = "force-dynamic";
 
 export default async function RemitosPage() {
   const [remitosRes, clientsRes, productsRes] = await Promise.all([

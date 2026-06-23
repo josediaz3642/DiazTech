@@ -3,7 +3,7 @@ import { getClientsForSelect } from "@/actions/invoices";
 import { getSuppliers } from "@/actions/suppliers";
 import ReceiptsClient from "./ReceiptsClient";
 
-export const revalidate = 0; // Disable server component caching to ensure real-time data
+export const dynamic = "force-dynamic";
 
 export default async function ReceiptsPage() {
   const [receiptsRes, clientsRes, suppliersRes] = await Promise.all([

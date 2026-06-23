@@ -1,7 +1,7 @@
 import { getSuppliers, getSupplierStats } from "@/actions/suppliers";
 import SuppliersClient from "./SuppliersClient";
 
-export const revalidate = 0; // Disable server component caching to ensure real-time data
+export const dynamic = "force-dynamic";
 
 export default async function SuppliersPage() {
   const [suppliersRes, statsRes] = await Promise.all([

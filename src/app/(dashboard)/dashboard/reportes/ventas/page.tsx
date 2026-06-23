@@ -1,7 +1,7 @@
 import { getSalesReport } from "@/actions/reports";
 import SalesPageClient from "./SalesPageClient";
 
-export const revalidate = 0; // Disable server component caching to ensure real-time data
+export const dynamic = "force-dynamic";
 
 export default async function VentasPage() {
   const result = await getSalesReport("month");

@@ -1,7 +1,7 @@
 import { getProducts, getWarehouses, getCategories, getProductStats } from "@/actions/products";
 import StockClient from "./StockClient";
 
-export const revalidate = 0; // Disable server component caching to ensure real-time data
+export const dynamic = "force-dynamic";
 
 export default async function StockPage() {
   const [productsRes, warehousesRes, categoriesRes, statsRes] = await Promise.all([
