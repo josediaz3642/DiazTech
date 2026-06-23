@@ -36,7 +36,7 @@ export async function getSession(): Promise<SessionData> {
   });
 
   if (!user) {
-    throw new Error("Usuario no encontrado");
+    throw new Error("No autenticado");
   }
 
   const membership = user.memberships[0];

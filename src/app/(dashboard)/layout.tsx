@@ -8,6 +8,8 @@ import { useSession, signOut } from "next-auth/react";
 import { canManageUsers, canManageSettings } from "@/lib/permissions";
 import { getDashboardMetrics } from "@/actions/dashboard";
 import styles from "./dashboard.module.css";
+import DiazBot from "./dashboard/components/DiazBot";
+import POSMode from "./dashboard/components/POSMode";
 
 const BASE_NAV = [
   {
@@ -34,6 +36,7 @@ const BASE_NAV = [
       { icon: "💵", label: "Caja", href: "/dashboard/caja" },
       { icon: "🏦", label: "Bancos", href: "/dashboard/bancos" },
       { icon: "📝", label: "Cheques", href: "/dashboard/cheques" },
+      { icon: "📅", label: "Agenda", href: "/dashboard/agenda" },
     ],
   },
   {
@@ -53,6 +56,15 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
+
+  // POS & Dark Mode
+  const [showPOS, setShowPOS] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Apply dark mode to document
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", darkMode ? "dark-true" : "light");
+  }, [darkMode]);
 
   // Search & Notification States
   const [showSearch, setShowSearch] = useState(false);
@@ -110,7 +122,7 @@ export default function DashboardLayout({
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
 
-  // Global Keyboard Shortcuts (Ctrl+K to search, Esc to close modals)
+  // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -119,16 +131,21 @@ export default function DashboardLayout({
         setSearchQuery("");
         setSelectedSearchIndex(0);
       }
+      // Ctrl+Shift+V → POS Mode
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "v") {
+        e.preventDefault();
+        setShowPOS(prev => !prev);
+      }
       if (e.key === "Escape") {
         setShowSearch(false);
         setShowNotifications(false);
+        setShowPOS(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Search items config
   const searchItems = useMemo(() => [
     { icon: "🏠", label: "Dashboard", href: "/dashboard", description: "Resumen principal e indicadores" },
     { icon: "📊", label: "Reportes", href: "/dashboard/reportes", description: "Ventas, tesorería, stock y CRM" },
@@ -141,12 +158,14 @@ export default function DashboardLayout({
     { icon: "💵", label: "Caja", href: "/dashboard/caja", description: "Arqueo de caja diaria y movimientos" },
     { icon: "🏦", label: "Bancos", href: "/dashboard/bancos", description: "Conciliación bancaria y cuentas" },
     { icon: "📝", label: "Cheques", href: "/dashboard/cheques", description: "Control de cheques de terceros y propios" },
+    { icon: "📅", label: "Agenda", href: "/dashboard/agenda", description: "Calendario financiero — cheques, facturas, CRM" },
     { icon: "📦", label: "Stock", href: "/dashboard/stock", description: "Control de inventario, stock y almacén" },
     { icon: "🎯", label: "CRM", href: "/dashboard/crm", description: "Seguimiento de oportunidades y prospectos" },
     { icon: "👤", label: "Mi Perfil", href: "/dashboard/perfil", description: "Configuración de perfil de usuario" },
     { icon: "👥", label: "Usuarios", href: "/dashboard/usuarios", description: "Control de acceso y roles de usuario" },
     { icon: "⚙️", label: "Ajustes", href: "/dashboard/ajustes", description: "Configuración general del sistema" },
   ], []);
+
 
   // Filter search items
   const filteredSearchItems = useMemo(() => {
@@ -310,6 +329,34 @@ export default function DashboardLayout({
           </div>
 
           <div className={styles.headerRight}>
+            {/* Dark mode toggle */}
+            <button
+              className={styles.headerBtn}
+              onClick={() => setDarkMode(prev => !prev)}
+              aria-label="Cambiar tema"
+              title={darkMode ? "Modo claro" : "Modo oscuro"}
+            >
+              {darkMode ? "☀️" : "🌙"}
+            </button>
+
+            {/* POS Mode button */}
+            <button
+              className={styles.headerBtn}
+              onClick={() => setShowPOS(true)}
+              aria-label="Modo Vendedor Rápido"
+              title="Modo Vendedor Rápido (Ctrl+Shift+V)"
+              style={{ position: "relative" }}
+            >
+              ⚡
+              <span style={{
+                position: "absolute", top: -4, right: -4,
+                background: "var(--primary-500)", color: "white",
+                fontSize: "0.5rem", fontWeight: 900,
+                borderRadius: "var(--radius-full)",
+                padding: "1px 3px", lineHeight: 1,
+              }}>POS</span>
+            </button>
+
             {/* Search Toggle button */}
             <button
               className={styles.headerBtn}
@@ -486,6 +533,12 @@ export default function DashboardLayout({
         {/* Page Content */}
         <div className={styles.pageContent}>{children}</div>
       </main>
+
+      {/* DiazBot floating assistant */}
+      <DiazBot />
+
+      {/* POS Mode overlay */}
+      <POSMode open={showPOS} onClose={() => setShowPOS(false)} />
 
       {/* Search overlay portal */}
       {showSearch && (

@@ -540,12 +540,12 @@ export default function InvoicingClient({
                     <>
                       <div><strong>CAE N°:</strong> {selectedInvoice.cae}</div>
                       <div><strong>Vencimiento CAE:</strong> {formatDate(selectedInvoice.caeExpiration)}</div>
+                      <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ width: "35px", height: "35px", backgroundColor: "#000" }}></div>
+                        <span style={{ fontSize: "8px", color: "#666" }}>Comprobante Autorizado por AFIP</span>
+                      </div>
                     </>
                   )}
-                  <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <div style={{ width: "35px", height: "35px", backgroundColor: "#000" }}></div>
-                    <span style={{ fontSize: "8px", color: "#666" }}>Comprobante Autorizado por AFIP</span>
-                  </div>
                 </div>
                 <div className="afipFooterRight">
                   <div>Neto Gravado: {formatCurrency(Number(selectedInvoice.subtotal))}</div>

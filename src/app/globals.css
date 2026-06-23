@@ -170,6 +170,34 @@
   --input-border: #3D405B;
 }
 
+/* ── True Dark Mode ── */
+[data-theme="dark-true"] {
+  --bg-primary: #0F1117;
+  --bg-secondary: #1A1D27;
+  --bg-tertiary: #222535;
+  --bg-surface: #1A1D27;
+  --bg-surface-hover: #252840;
+  --bg-glass: rgba(15, 17, 23, 0.92);
+
+  --text-primary: #E8E8F0;
+  --text-secondary: #E07A5F;
+  --text-tertiary: #8B8FA8;
+  --text-inverse: #0F1117;
+
+  --border-primary: #353750;
+  --border-secondary: rgba(53, 55, 80, 0.6);
+  --border-focus: #E07A5F;
+
+  --input-bg: #222535;
+  --input-border: #454766;
+
+  --shadow-sm: 1px 1px 0px rgba(0,0,0,0.5);
+  --shadow-md: 3px 3px 0px rgba(0,0,0,0.5);
+  --shadow-lg: 6px 6px 0px rgba(0,0,0,0.5);
+  --shadow-xl: 10px 10px 0px rgba(0,0,0,0.5);
+}
+
+
 /* ── Reset ── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -385,11 +413,34 @@ ul, ol {
   .printableArea, .printableArea * {
     visibility: visible !important;
   }
+  
+  /* Ensure parent containers of printableArea don't restrict print height or layout */
+  body, html {
+    background: white !important;
+    color: black !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Target both class names and css module classes for overlays */
+  [class*="modalOverlay"], .modalOverlay {
+    position: static !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+  }
+
   .printableArea {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
     width: 100% !important;
+    max-width: 100% !important;
     margin: 0 !important;
     padding: 0px !important;
     border: none !important;
@@ -397,6 +448,7 @@ ul, ol {
     background: white !important;
     color: black !important;
     z-index: 9999999 !important;
+    display: block !important;
   }
   .noPrint {
     display: none !important;
@@ -426,6 +478,7 @@ ul, ol {
 .afipHeaderLeft {
   padding: var(--space-3);
   border-right: 1px solid #333 !important;
+  grid-column: 1;
 }
 
 .afipHeaderLetterBox {
@@ -461,6 +514,7 @@ ul, ol {
 .afipHeaderRight {
   padding: var(--space-3);
   padding-left: var(--space-8);
+  grid-column: 3;
 }
 
 .afipCompanyTitle {

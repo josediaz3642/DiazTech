@@ -8,6 +8,8 @@ function fmt(n: number) {
   return `$${n.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`;
 }
 
+export const revalidate = 0; // Disable server component caching to ensure real-time data
+
 export default async function StockReportePage() {
   const result = await getStockReport();
   const data = result.success && result.data

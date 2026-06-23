@@ -32,6 +32,8 @@ const PRIORITY_CLASS: Record<string, string> = {
   urgent: "priorityUrgent",
 };
 
+export const revalidate = 0; // Disable server component caching to ensure real-time data
+
 export default async function CrmReportePage() {
   const result = await getCrmReport("month");
   const data = result.success && result.data

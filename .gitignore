@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+pg-installer.exe
+
+# Agents
+.agents/
+skills-lock.json
+

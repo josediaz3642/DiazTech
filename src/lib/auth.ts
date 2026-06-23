@@ -50,4 +50,48 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    ...authConfig.callbacks,
+    // ── JWT: extend token with custom fields + stale-session check ──
+    async jwt({ token, user, trigger }) {
+      // Fresh login: populate token from the user object
+      if (user) {
+        token.id = user.id;
+        token.role = (user as { role?: string }).role ?? "VIEWER";
+        token.companyId = (user as { companyId?: string | null }).companyId ?? null;
+        token.isGlobalAdmin = (user as { isGlobalAdmin?: boolean }).isGlobalAdmin ?? false;
+        token._dbCheckedAt = Date.now();
+        return token;
+      }
+
+      // Subsequent requests: periodically verify the user still exists in DB.
+      // This prevents stale JWTs (e.g. after a DB migration) from causing cryptic errors.
+      const CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+      const lastCheck = (token._dbCheckedAt as number) ?? 0;
+
+      if (Date.now() - lastCheck > CHECK_INTERVAL_MS && token.id) {
+        try {
+          const exists = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { id: true },
+          });
+
+          if (!exists) {
+            // User no longer exists in DB (e.g. DB was replaced/migrated).
+            // Return null to invalidate the session and force re-login.
+            console.warn(`[auth] JWT invalidated: user ${token.id} not found in DB.`);
+            return null as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+          }
+
+          token._dbCheckedAt = Date.now();
+        } catch (err) {
+          // If the DB check fails (network issue, etc.), keep the token.
+          console.error("[auth] DB user check failed, keeping token:", err);
+        }
+      }
+
+      return token;
+    },
+  },
 });
+

@@ -8,6 +8,8 @@ function fmt(n: number) {
   return `$${n.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`;
 }
 
+export const revalidate = 0; // Disable server component caching to ensure real-time data
+
 export default async function TesoreriaPage() {
   const result = await getTreasuryReport("month");
   const data = result.success && result.data

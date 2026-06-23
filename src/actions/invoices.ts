@@ -131,7 +131,7 @@ export async function createInvoice(
           currency: data.currency ?? "ARS",
           exchangeRate: data.exchangeRate ?? 1,
           notes: data.notes || null,
-          status: "pending",
+          status: "authorized",
           items: {
             create: data.items.map((item) => ({
               productId: item.productId || null,
