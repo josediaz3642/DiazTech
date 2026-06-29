@@ -1,9 +1,9 @@
+import { connection } from "next/server";
 import { getSuppliers, getSupplierStats } from "@/actions/suppliers";
 import SuppliersClient from "./SuppliersClient";
 
-export const dynamic = "force-dynamic";
-
 export default async function SuppliersPage() {
+  await connection();
   const [suppliersRes, statsRes] = await Promise.all([
     getSuppliers(),
     getSupplierStats(),

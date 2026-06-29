@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { getTreasuryReport } from "@/actions/reports";
 import Link from "next/link";
 import { TreasuryCharts } from "./TreasuryCharts";
@@ -8,9 +9,8 @@ function fmt(n: number) {
   return `$${n.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`;
 }
 
-export const dynamic = "force-dynamic";
-
 export default async function TesoreriaPage() {
+  await connection();
   const result = await getTreasuryReport("month");
   const data = result.success && result.data
     ? result.data

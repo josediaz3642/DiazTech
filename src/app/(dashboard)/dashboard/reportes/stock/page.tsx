@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { getStockReport } from "@/actions/reports";
 import Link from "next/link";
 import { StockCharts } from "./StockCharts";
@@ -8,9 +9,8 @@ function fmt(n: number) {
   return `$${n.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`;
 }
 
-export const dynamic = "force-dynamic";
-
 export default async function StockReportePage() {
+  await connection();
   const result = await getStockReport();
   const data = result.success && result.data
     ? result.data

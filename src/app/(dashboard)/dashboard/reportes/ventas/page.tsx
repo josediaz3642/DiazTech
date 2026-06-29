@@ -1,9 +1,9 @@
+import { connection } from "next/server";
 import { getSalesReport } from "@/actions/reports";
 import SalesPageClient from "./SalesPageClient";
 
-export const dynamic = "force-dynamic";
-
 export default async function VentasPage() {
+  await connection();
   const result = await getSalesReport("month");
   const data = result.success && result.data
     ? result.data

@@ -1,9 +1,9 @@
+import { connection } from "next/server";
 import { getProducts, getWarehouses, getCategories, getProductStats } from "@/actions/products";
 import StockClient from "./StockClient";
 
-export const dynamic = "force-dynamic";
-
 export default async function StockPage() {
+  await connection();
   const [productsRes, warehousesRes, categoriesRes, statsRes] = await Promise.all([
     getProducts(),
     getWarehouses(),

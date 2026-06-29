@@ -1,9 +1,9 @@
+import { connection } from "next/server";
 import { getClients, getClientStats } from "@/actions/clients";
 import ClientsClient from "./ClientsClient";
 
-export const dynamic = "force-dynamic";
-
 export default async function ClientsPage() {
+  await connection();
   const [clientsRes, statsRes] = await Promise.all([
     getClients(),
     getClientStats(),

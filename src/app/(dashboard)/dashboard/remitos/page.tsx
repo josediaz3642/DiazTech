@@ -1,10 +1,10 @@
+import { connection } from "next/server";
 import { getRemitos } from "@/actions/remitos";
 import { getClientsForSelect, getProductsForSelect } from "@/actions/invoices";
 import RemitosClient from "./RemitosClient";
 
-export const dynamic = "force-dynamic";
-
 export default async function RemitosPage() {
+  await connection();
   const [remitosRes, clientsRes, productsRes] = await Promise.all([
     getRemitos(),
     getClientsForSelect(),

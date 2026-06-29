@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { getCrmReport } from "@/actions/reports";
 import Link from "next/link";
 import { CrmCharts } from "./CrmCharts";
@@ -32,9 +33,8 @@ const PRIORITY_CLASS: Record<string, string> = {
   urgent: "priorityUrgent",
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function CrmReportePage() {
+  await connection();
   const result = await getCrmReport("month");
   const data = result.success && result.data
     ? result.data

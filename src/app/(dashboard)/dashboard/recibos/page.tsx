@@ -1,11 +1,11 @@
+import { connection } from "next/server";
 import { getReceipts } from "@/actions/receipts";
 import { getClientsForSelect } from "@/actions/invoices";
 import { getSuppliers } from "@/actions/suppliers";
 import ReceiptsClient from "./ReceiptsClient";
 
-export const dynamic = "force-dynamic";
-
 export default async function ReceiptsPage() {
+  await connection();
   const [receiptsRes, clientsRes, suppliersRes] = await Promise.all([
     getReceipts(),
     getClientsForSelect(),

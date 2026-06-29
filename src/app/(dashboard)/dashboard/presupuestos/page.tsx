@@ -1,10 +1,10 @@
+import { connection } from "next/server";
 import { getBudgets } from "@/actions/budgets";
 import { getClientsForSelect, getProductsForSelect } from "@/actions/invoices";
 import BudgetsClient from "./BudgetsClient";
 
-export const dynamic = "force-dynamic";
-
 export default async function BudgetsPage() {
+  await connection();
   const [budgetsRes, clientsRes, productsRes] = await Promise.all([
     getBudgets(),
     getClientsForSelect(),
